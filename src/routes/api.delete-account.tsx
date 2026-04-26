@@ -1,44 +1,36 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Server function to fully delete the current user's account.
- * Requires the caller's bearer token; uses service role to call admin API.
+ * Client-side function to delete the current user's account.
+ * Calls Supabase admin API via service role for account deletion.
  */
-export const deleteCurrentUser = createServerFn({ method: "POST" })
-  .handler(async () => {
-    const { getRequest } = await import("@tanstack/react-start/server");
-    const req = getRequest();
-    const auth = req.headers.get("authorization") || req.headers.get("Authorization");
-    if (!auth || !auth.toLowerCase().startsWith("bearer ")) {
-      throw new Error("Missing auth token");
-    }
-    const token = auth.slice(7);
+export const deleteCurrentUser = async () => {
+  const { data: session } = await supabase.auth.getSession();
+  if (!session?.session?.access_token) {
+    throw new Error("Not signed in");
+  }
 
-    const url = process.env.SUPABASE_URL!;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    if (!url || !serviceKey) throw new Error("Server not configured");
+  const token = session.session.access_token;
 
-    const admin = createClient(url, serviceKey);
-    const { data: userData, error: userErr } = await admin.auth.getUser(token);
-    if (userErr || !userData.user) throw new Error("Invalid session");
-
-    const userId = userData.user.id;
-    // profiles row will cascade-delete via FK if configured; delete explicitly to be safe.
-    await admin.from("profiles").delete().eq("user_id", userId);
-
-    const { error: delErr } = await admin.auth.admin.deleteUser(userId);
-    if (delErr) throw new Error(delErr.message);
-
-    return { success: true };
+  // Call Supabase Edge Function for account deletion
+  const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-account`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
   });
 
-// Hidden no-op route — file exists only to host the server function
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(error || 'Failed to delete account');
+  }
+
+  return { success: true };
+};
+
+// Hidden no-op route — file exists only to host the client function
 export const Route = createFileRoute("/api/delete-account")({
-  server: {
-    handlers: {
-      GET: async () => new Response("Not allowed", { status: 405 }),
-    },
-  },
+  component: () => null,
 });

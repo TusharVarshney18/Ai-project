@@ -10,6 +10,12 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { StarField } from "@/components/StarField";
 
+const credsSchema = z.object({
+  email: z.string().trim().email("Enter a valid email").max(255),
+  password: z.string().min(6, "Password must be at least 6 characters").max(72),
+});
+
+type Mode = "login" | "register" | "forgot";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -20,13 +26,6 @@ export const Route = createFileRoute("/auth")({
     ],
   }),
 });
-
-const credsSchema = z.object({
-  email: z.string().trim().email("Enter a valid email").max(255),
-  password: z.string().min(6, "Password must be at least 6 characters").max(72),
-});
-
-type Mode = "login" | "register" | "forgot";
 
 function AuthPage() {
   const navigate = useNavigate();
@@ -84,26 +83,24 @@ function AuthPage() {
     }
   };
 
+  const onGoogle = async () => {
+    setError(null);
+    setBusy(true);
 
-const onGoogle = async () => {
-  setError(null);
-  setBusy(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin,
+      },
+    });
 
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: window.location.origin,
-    },
-  });
+    if (error) {
+      setBusy(false);
+      setError(error.message);
+    }
 
-  if (error) {
-    setBusy(false);
-    setError(error.message);
-  }
-
-  // ❌ DO NOT navigate manually
-  // Supabase will handle redirect automatically
-};
+    // Supabase will handle redirect automatically
+  };
 
   return (
     <main className="relative flex min-h-screen items-center justify-center px-4">
@@ -124,8 +121,8 @@ const onGoogle = async () => {
               <svg className="mr-2 h-4 w-4" viewBox="0 0 48 48" aria-hidden>
                 <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.4 29.3 35 24 35c-6.1 0-11-4.9-11-11s4.9-11 11-11c2.8 0 5.4 1.1 7.4 2.8l5.7-5.7C33.6 7.1 29 5 24 5 13.5 5 5 13.5 5 24s8.5 19 19 19 19-8.5 19-19c0-1.2-.1-2.4-.4-3.5z"/>
                 <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c2.8 0 5.4 1.1 7.4 2.8l5.7-5.7C33.6 7.1 29 5 24 5 16.4 5 9.8 9 6.3 14.7z"/>
-                <path fill="#4CAF50" d="M24 43c5 0 9.5-1.9 12.9-5l-6-5.1C29.1 34.4 26.7 35 24 35c-5.3 0-9.7-2.6-11.3-6.5l-6.5 5C9.6 39 16.2 43 24 43z"/>
-                <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.8l6 5.1C40.9 35.6 44 30.3 44 24c0-1.2-.1-2.4-.4-3.5z"/>
+                <path fill="#4CAF50" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.8l6 5.1C40.9 35.6 44 30.3 44 24c0-1.2-.1-2.4-.4-3.5z"/>
+                <path fill="#1976D2" d="M24 43c5 0 9.5-1.9 12.9-5l-6-5.1C29.1 34.4 26.7 35 24 35c-5.3 0-9.7-2.6-11.3-6.5l-6.5 5C9.6 39 16.2 43 24 43z"/>
               </svg>
               Continue with Google
             </Button>
