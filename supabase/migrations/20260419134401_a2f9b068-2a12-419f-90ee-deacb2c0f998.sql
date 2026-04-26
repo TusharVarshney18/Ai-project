@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS bunny TEXT NOT NULL DEFAULT 'mochi';
