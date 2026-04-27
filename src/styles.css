@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+import tailwindcss from "@tailwindcss/vite";
 
 /* LIGHT (default) — soft meadow / sky */
 :root {
