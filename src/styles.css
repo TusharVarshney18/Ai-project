@@ -1,4 +1,4 @@
-import tailwindcss from "@tailwindcss/vite";
+@import "tailwindcss";
 
 /* LIGHT (default) — soft meadow / sky */
 :root {
