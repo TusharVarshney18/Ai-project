@@ -107,3 +107,7 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+.shadow-glow {
+  box-shadow: var(--shadow-glow);
+}

@@ -2,13 +2,7 @@ import { createFileRoute, useNavigate, Navigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { StarField } from "@/components/StarField";
 
 const credsSchema = z.object({
   email: z.string().trim().email("Enter a valid email").max(255),
@@ -19,17 +13,12 @@ type Mode = "login" | "register" | "forgot";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
-  head: () => ({
-    meta: [
-      { title: "Sign in to Mochi 🐰" },
-      { name: "description", content: "Log in or create an account to chat privately with Mochi the AI bunny." },
-    ],
-  }),
 });
 
 function AuthPage() {
   const navigate = useNavigate();
   const { session, loading } = useAuth();
+
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,138 +34,209 @@ function AuthPage() {
     setInfo(null);
 
     if (mode === "forgot") {
-      const parsed = z.string().trim().email("Enter a valid email").safeParse(email);
-      if (!parsed.success) { setError(parsed.error.issues[0].message); return; }
+      const parsed = z.string().email().safeParse(email);
+      if (!parsed.success) return setError("Invalid email");
+
       setBusy(true);
-      const { error: err } = await supabase.auth.resetPasswordForEmail(parsed.data, {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       setBusy(false);
-      if (err) setError(err.message);
-      else setInfo("Password reset email sent. Check your inbox!");
+
+      if (error) setError(error.message);
+      else setInfo("Reset link sent to your email.");
       return;
     }
 
     const parsed = credsSchema.safeParse({ email, password });
-    if (!parsed.success) { setError(parsed.error.issues[0].message); return; }
+    if (!parsed.success) return setError(parsed.error.issues[0].message);
+
     setBusy(true);
     try {
       if (mode === "register") {
-        const { error: err } = await supabase.auth.signUp({
-          email: parsed.data.email,
-          password: parsed.data.password,
-          options: { emailRedirectTo: `${window.location.origin}/` },
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: window.location.origin },
         });
-        if (err) throw err;
+        if (error) throw error;
       } else {
-        const { error: err } = await supabase.auth.signInWithPassword({
-          email: parsed.data.email,
-          password: parsed.data.password,
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
         });
-        if (err) throw err;
+        if (error) throw error;
       }
+
       navigate({ to: "/" });
     } catch (err: any) {
-      setError(err?.message ?? "Authentication failed");
+      setError(err.message || "Auth failed");
     } finally {
       setBusy(false);
     }
   };
 
   const onGoogle = async () => {
-    setError(null);
     setBusy(true);
-
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: {
-        redirectTo: window.location.origin,
-      },
+      options: { redirectTo: window.location.origin },
     });
 
     if (error) {
       setBusy(false);
       setError(error.message);
     }
-
-    // Supabase will handle redirect automatically
   };
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center px-4">
-      <StarField />
-      <Card className="w-full max-w-md p-8 glass">
-        <h1 className="text-3xl font-bold tracking-tight">
-          {mode === "login" ? "Welcome back" : mode === "register" ? "Create account" : "Reset password"} <span>🐰</span>
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {mode === "login" && "Sign in to chat privately with Mochi."}
-          {mode === "register" && "Make an account to start chatting with Mochi."}
-          {mode === "forgot" && "Enter your email and we'll send you a reset link."}
-        </p>
+    <main className="relative min-h-screen flex items-center justify-center overflow-hidden">
 
-        {mode !== "forgot" && (
-          <>
-            <Button type="button" variant="outline" className="mt-6 w-full" onClick={onGoogle} disabled={busy}>
-              <svg className="mr-2 h-4 w-4" viewBox="0 0 48 48" aria-hidden>
-                <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.4 29.3 35 24 35c-6.1 0-11-4.9-11-11s4.9-11 11-11c2.8 0 5.4 1.1 7.4 2.8l5.7-5.7C33.6 7.1 29 5 24 5 13.5 5 5 13.5 5 24s8.5 19 19 19 19-8.5 19-19c0-1.2-.1-2.4-.4-3.5z"/>
-                <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c2.8 0 5.4 1.1 7.4 2.8l5.7-5.7C33.6 7.1 29 5 24 5 16.4 5 9.8 9 6.3 14.7z"/>
-                <path fill="#4CAF50" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.8l6 5.1C40.9 35.6 44 30.3 44 24c0-1.2-.1-2.4-.4-3.5z"/>
-                <path fill="#1976D2" d="M24 43c5 0 9.5-1.9 12.9-5l-6-5.1C29.1 34.4 26.7 35 24 35c-5.3 0-9.7-2.6-11.3-6.5l-6.5 5C9.6 39 16.2 43 24 43z"/>
-              </svg>
-              Continue with Google
-            </Button>
-            <div className="mt-6 flex items-center gap-3 text-xs text-muted-foreground">
-              <span className="h-px flex-1 bg-border" />
-              <span>or</span>
-              <span className="h-px flex-1 bg-border" />
+      {/* SKY BACKGROUND */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-200 via-sky-100 to-blue-300" />
+
+      {/* SUN GLOW */}
+      <div className="absolute -top-20 -right-20 w-[320px] h-[320px] rounded-full bg-yellow-200/40 blur-3xl" />
+
+      {/* LIGHT RAY */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_10%,rgba(255,248,220,0.35),transparent_60%)]" />
+
+      {/* CLOUDS */}
+      <Clouds />
+
+      {/* CARD */}
+      <div className="relative z-10 w-full max-w-md mx-4">
+        <div className="bg-white/70 backdrop-blur-2xl border border-white/80 rounded-3xl p-8 shadow-[0_20px_60px_rgba(80,130,180,0.2)]">
+
+          {/* HEADER */}
+          <div className="text-center mb-6">
+            <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-white shadow flex items-center justify-center">
+              🐰
             </div>
-          </>
-        )}
 
-        <form onSubmit={onSubmit} className="mt-6 space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <h1 className="text-xl font-semibold text-gray-800">
+              {mode === "login" && "Sign in"}
+              {mode === "register" && "Create account"}
+              {mode === "forgot" && "Reset password"}
+            </h1>
+
+            <p className="text-sm text-gray-500 mt-1">
+              {mode === "login" && "Welcome back to Mochi"}
+              {mode === "register" && "Start chatting with Mochi"}
+              {mode === "forgot" && "We’ll send a reset link"}
+            </p>
           </div>
+
+          {/* GOOGLE */}
           {mode !== "forgot" && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                {mode === "login" && (
-                  <button type="button" className="text-xs text-muted-foreground hover:text-foreground" onClick={() => { setMode("forgot"); setError(null); setInfo(null); }}>
-                    Forgot?
-                  </button>
-                )}
-              </div>
-              <Input id="password" type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
-            </div>
+            <>
+              <button
+                onClick={onGoogle}
+                className="w-full mb-4 h-11 rounded-xl bg-white border border-blue-200 shadow hover:bg-blue-50 transition"
+              >
+                Continue with Google
+              </button>
+
+              <div className="text-center text-xs text-gray-400 mb-4">or</div>
+            </>
           )}
 
-          {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
-          {info && <p className="text-sm text-foreground/80" role="status">{info}</p>}
+          {/* FORM */}
+          <form onSubmit={onSubmit} className="space-y-4">
 
-          <Button type="submit" className="w-full" disabled={busy}>
-            {busy ? "Please wait…" : mode === "login" ? "Sign in" : mode === "register" ? "Create account" : "Send reset link"}
-          </Button>
-        </form>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full h-12 px-4 rounded-xl bg-white border border-blue-200 focus:ring-2 focus:ring-blue-300 outline-none"
+            />
 
-        <button
-          type="button"
-          onClick={() => {
-            setMode((m) => (m === "login" ? "register" : "login"));
-            setError(null); setInfo(null);
-          }}
-          className="mt-4 w-full text-center text-sm text-muted-foreground hover:text-foreground"
-        >
-          {mode === "login" ? "No account? Create one" : mode === "register" ? "Already have an account? Sign in" : ""}
-        </button>
-        {mode === "forgot" && (
-          <button type="button" onClick={() => { setMode("login"); setError(null); setInfo(null); }} className="mt-4 w-full text-center text-sm text-muted-foreground hover:text-foreground">
-            Back to sign in
-          </button>
-        )}
-      </Card>
+            {mode !== "forgot" && (
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full h-12 px-4 rounded-xl bg-white border border-blue-200 focus:ring-2 focus:ring-blue-300 outline-none"
+              />
+            )}
+
+            {mode === "login" && (
+              <div className="text-right text-sm">
+                <button
+                  type="button"
+                  onClick={() => setMode("forgot")}
+                  className="text-blue-500 hover:underline"
+                >
+                  Forgot?
+                </button>
+              </div>
+            )}
+
+            {error && (
+              <div className="text-red-600 text-sm">{error}</div>
+            )}
+
+            {info && (
+              <div className="text-green-600 text-sm">{info}</div>
+            )}
+
+            <button
+              type="submit"
+              disabled={busy}
+              className="w-full h-12 rounded-xl bg-gray-900 text-white hover:scale-[1.02] transition"
+            >
+              {busy
+                ? "Please wait..."
+                : mode === "login"
+                ? "Sign in"
+                : mode === "register"
+                ? "Create account"
+                : "Send reset link"}
+            </button>
+          </form>
+
+          {/* FOOTER */}
+          <div className="text-center mt-6 text-sm text-gray-500">
+            {mode === "login" && (
+              <>
+                No account?
+                <button onClick={() => setMode("register")} className="ml-1 text-blue-600">
+                  Sign up
+                </button>
+              </>
+            )}
+
+            {mode === "register" && (
+              <>
+                Already have one?
+                <button onClick={() => setMode("login")} className="ml-1 text-blue-600">
+                  Sign in
+                </button>
+              </>
+            )}
+
+            {mode === "forgot" && (
+              <button onClick={() => setMode("login")} className="text-blue-600">
+                Back to login
+              </button>
+            )}
+          </div>
+
+        </div>
+      </div>
     </main>
+  );
+}
+
+/* CLOUD COMPONENT */
+function Clouds() {
+  return (
+    <>
+      <div className="absolute top-[10%] left-[-20%] w-60 h-24 bg-white/70 rounded-full blur-xl animate-[float_60s_linear_infinite]" />
+      <div className="absolute top-[30%] left-[-30%] w-72 h-28 bg-white/60 rounded-full blur-xl animate-[float_80s_linear_infinite]" />
+      <div className="absolute top-[60%] left-[-25%] w-64 h-24 bg-white/50 rounded-full blur-xl animate-[float_70s_linear_infinite]" />
+    </>
   );
 }
