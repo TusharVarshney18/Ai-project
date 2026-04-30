@@ -11,6 +11,13 @@ const credsSchema = z.object({
 
 type Mode = "login" | "register" | "forgot";
 
+/**
+ * ✅ FINAL REDIRECT FIX (works everywhere)
+ */
+const getRedirectUrl = () => {
+  return import.meta.env.VITE_APP_URL || window.location.origin;
+};
+
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
@@ -38,9 +45,11 @@ function AuthPage() {
       if (!parsed.success) return setError("Invalid email");
 
       setBusy(true);
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${getRedirectUrl()}/reset-password`,
       });
+
       setBusy(false);
 
       if (error) setError(error.message);
@@ -52,19 +61,24 @@ function AuthPage() {
     if (!parsed.success) return setError(parsed.error.issues[0].message);
 
     setBusy(true);
+
     try {
       if (mode === "register") {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: {
+            emailRedirectTo: getRedirectUrl(),
+          },
         });
+
         if (error) throw error;
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
+
         if (error) throw error;
       }
 
@@ -78,9 +92,12 @@ function AuthPage() {
 
   const onGoogle = async () => {
     setBusy(true);
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: window.location.origin },
+      options: {
+        redirectTo: getRedirectUrl(),
+      },
     });
 
     if (error) {
@@ -92,13 +109,9 @@ function AuthPage() {
   return (
     <main className="relative min-h-screen flex items-center justify-center overflow-hidden">
 
-      {/* SKY BACKGROUND */}
+      {/* BACKGROUND */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-200 via-sky-100 to-blue-300" />
-
-      {/* SUN GLOW */}
       <div className="absolute -top-20 -right-20 w-[320px] h-[320px] rounded-full bg-yellow-200/40 blur-3xl" />
-
-      {/* LIGHT RAY */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_10%,rgba(255,248,220,0.35),transparent_60%)]" />
 
       {/* CLOUDS */}
@@ -108,7 +121,6 @@ function AuthPage() {
       <div className="relative z-10 w-full max-w-md mx-4">
         <div className="bg-white/70 backdrop-blur-2xl border border-white/80 rounded-3xl p-8 shadow-[0_20px_60px_rgba(80,130,180,0.2)]">
 
-          {/* HEADER */}
           <div className="text-center mb-6">
             <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-white shadow flex items-center justify-center">
               🐰
@@ -119,15 +131,8 @@ function AuthPage() {
               {mode === "register" && "Create account"}
               {mode === "forgot" && "Reset password"}
             </h1>
-
-            <p className="text-sm text-gray-500 mt-1">
-              {mode === "login" && "Welcome back to Mochi"}
-              {mode === "register" && "Start chatting with Mochi"}
-              {mode === "forgot" && "We’ll send a reset link"}
-            </p>
           </div>
 
-          {/* GOOGLE */}
           {mode !== "forgot" && (
             <>
               <button
@@ -136,12 +141,10 @@ function AuthPage() {
               >
                 Continue with Google
               </button>
-
               <div className="text-center text-xs text-gray-400 mb-4">or</div>
             </>
           )}
 
-          {/* FORM */}
           <form onSubmit={onSubmit} className="space-y-4">
 
             <input
@@ -149,7 +152,7 @@ function AuthPage() {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full h-12 px-4 rounded-xl bg-white border border-blue-200 focus:ring-2 focus:ring-blue-300 outline-none"
+              className="w-full h-12 px-4 rounded-xl bg-white border border-blue-200"
             />
 
             {mode !== "forgot" && (
@@ -158,47 +161,31 @@ function AuthPage() {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-12 px-4 rounded-xl bg-white border border-blue-200 focus:ring-2 focus:ring-blue-300 outline-none"
+                className="w-full h-12 px-4 rounded-xl bg-white border border-blue-200"
               />
             )}
 
             {mode === "login" && (
               <div className="text-right text-sm">
-                <button
-                  type="button"
-                  onClick={() => setMode("forgot")}
-                  className="text-blue-500 hover:underline"
-                >
+                <button type="button" onClick={() => setMode("forgot")} className="text-blue-500">
                   Forgot?
                 </button>
               </div>
             )}
 
-            {error && (
-              <div className="text-red-600 text-sm">{error}</div>
-            )}
-
-            {info && (
-              <div className="text-green-600 text-sm">{info}</div>
-            )}
+            {error && <div className="text-red-600 text-sm">{error}</div>}
+            {info && <div className="text-green-600 text-sm">{info}</div>}
 
             <button
               type="submit"
               disabled={busy}
-              className="w-full h-12 rounded-xl bg-gray-900 text-white hover:scale-[1.02] transition"
+              className="w-full h-12 rounded-xl bg-gray-900 text-white"
             >
-              {busy
-                ? "Please wait..."
-                : mode === "login"
-                ? "Sign in"
-                : mode === "register"
-                ? "Create account"
-                : "Send reset link"}
+              {busy ? "Please wait..." : "Continue"}
             </button>
           </form>
 
-          {/* FOOTER */}
-          <div className="text-center mt-6 text-sm text-gray-500">
+          <div className="text-center mt-6 text-sm">
             {mode === "login" && (
               <>
                 No account?
@@ -219,7 +206,7 @@ function AuthPage() {
 
             {mode === "forgot" && (
               <button onClick={() => setMode("login")} className="text-blue-600">
-                Back to login
+                Back
               </button>
             )}
           </div>
@@ -230,13 +217,11 @@ function AuthPage() {
   );
 }
 
-/* CLOUD COMPONENT */
 function Clouds() {
   return (
     <>
       <div className="absolute top-[10%] left-[-20%] w-60 h-24 bg-white/70 rounded-full blur-xl animate-[float_60s_linear_infinite]" />
       <div className="absolute top-[30%] left-[-30%] w-72 h-28 bg-white/60 rounded-full blur-xl animate-[float_80s_linear_infinite]" />
-      <div className="absolute top-[60%] left-[-25%] w-64 h-24 bg-white/50 rounded-full blur-xl animate-[float_70s_linear_infinite]" />
     </>
   );
 }
