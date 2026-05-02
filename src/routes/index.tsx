@@ -93,12 +93,14 @@ function Index() {
         />
       </div>
 
-      {/* Header — hidden on mobile to save vertical space */}
-      <header className="mb-6 text-center hidden md:block shrink-0">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-          Meet <span className="text-gradient">{current.name}</span> {current.emoji}
+      <header className="mb-4 w-full rounded-[2rem] border border-white/15 bg-white/10 px-5 py-5 text-center shadow-[0_30px_80px_-40px_rgba(0,0,0,0.45)] backdrop-blur-xl md:mb-6">
+        <p className="text-[11px] uppercase tracking-[0.35em] text-white/60">
+          AI Bunny chat
+        </p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+          Chat with <span className="text-gradient">{current.name}</span> {current.emoji}
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-white/75 sm:text-base">
           {current.description}
         </p>
       </header>
