@@ -38,14 +38,12 @@ function Index() {
 
   useEffect(() => { setBunny(profileBunny); }, [profileBunny]);
 
-  // Pre-load TTS voices
   useEffect(() => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.getVoices();
     }
   }, []);
 
-  // Soft "hop" when bunny appears / changes
   useEffect(() => {
     if (!loading && user) playHop();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -78,9 +76,15 @@ function Index() {
   const current = getBunny(bunny);
 
   return (
-    <main className="relative mx-auto flex min-h-screen max-w-6xl flex-col items-center px-4 py-8">
+    // ── On mobile: full dvh, no overflow, flex-col so bunny + chat stack neatly
+    // ── On desktop: original spacious centred layout
+    <main className="relative mx-auto flex max-w-6xl flex-col items-center px-4
+                     min-h-[100dvh] overflow-hidden
+                     md:min-h-screen md:overflow-visible md:py-8">
       <StarField />
-      <div className="absolute right-4 top-4">
+
+      {/* Profile menu — absolute so it doesn't affect layout flow */}
+      <div className="absolute right-4 top-4 z-10">
         <ProfileMenu
           userId={user.id}
           email={user.email ?? ""}
@@ -89,7 +93,8 @@ function Index() {
         />
       </div>
 
-      <header className="mb-6 text-center">
+      {/* Header — hidden on mobile to save vertical space */}
+      <header className="mb-6 text-center hidden md:block shrink-0">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
           Meet <span className="text-gradient">{current.name}</span> {current.emoji}
         </h1>
@@ -98,36 +103,46 @@ function Index() {
         </p>
       </header>
 
-      <section className="grid w-full grid-cols-1 items-center gap-8 md:grid-cols-2">
-        <div className="flex flex-col items-center justify-center gap-3">
-          <Avatar
-            isSpeaking={isSpeaking}
-            isThinking={state === "thinking"}
-            emotion={emotion}
-            mouthLevel={mouthLevel}
-            bunny={bunny}
-          />
-          <span className="rounded-full bg-secondary px-3 py-1 text-xs capitalize text-muted-foreground">
+      {/* Main content area:
+          Mobile  → vertical stack, bunny shrinks, chat fills remaining space
+          Desktop → side-by-side grid, original sizing */}
+      <section className="
+        flex flex-col items-center w-full gap-3 flex-1 min-h-0
+        pt-14
+        md:grid md:grid-cols-2 md:items-center md:gap-8 md:pt-0 md:flex-none
+      ">
+        {/* Bunny column — shrink-0 so keyboard never pushes it off screen */}
+        <div className="flex shrink-0 flex-col items-center justify-center gap-2 md:gap-3">
+          {/* Scale bunny down on mobile */}
+          <div className="scale-[0.72] md:scale-100 origin-top">
+            <Avatar
+              isSpeaking={isSpeaking}
+              isThinking={state === "thinking"}
+              emotion={emotion}
+              mouthLevel={mouthLevel}
+              bunny={bunny}
+            />
+          </div>
+          <span className="rounded-full bg-secondary px-3 py-1 text-xs capitalize text-muted-foreground -mt-8 md:mt-0">
             mood: {emotion}
           </span>
         </div>
-        <ChatBox messages={messages} state={state} onSend={handleSend} onStop={stop} />
+
+        {/* Chat column — flex-1 + min-h-0 makes it fill leftover space on mobile */}
+        <div className="w-full flex-1 min-h-0 flex flex-col md:flex-none md:block">
+          <ChatBox messages={messages} state={state} onSend={handleSend} onStop={stop} />
+        </div>
       </section>
-      <footer className="mt-10 text-center text-xs text-gray-500">
+
+      {/* Footer — hidden on mobile */}
+      <footer className="hidden md:block mt-10 text-center text-xs text-gray-500 shrink-0">
         <p>
           Private chat · Conversations are not saved ·{" "}
-          <span className="text-black-300 font-medium">
-            Powered by Tushar Studio
-          </span>
+          <span className="text-black-300 font-medium">Powered by Tushar Studio</span>
         </p>
-
         <div className="mt-2 flex justify-center gap-4">
-          <a href="/privacy" className="hover:text-white">
-            Privacy
-          </a>
-          <a href="/terms" className="hover:text-white">
-            Terms
-          </a>
+          <a href="/privacy" className="hover:text-white">Privacy</a>
+          <a href="/terms" className="hover:text-white">Terms</a>
         </div>
       </footer>
     </main>

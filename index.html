@@ -1,11 +1,24 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+
+    <!-- FIX 3: maximum-scale=1 stops iOS zooming on input focus
+         viewport-fit=cover lets content go edge-to-edge under notch/home bar -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+    />
+
+    <!-- PWA: makes it installable + gives it an app-like chrome -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Mochi" />
+    <meta name="theme-color" content="#a78bfa" />
+
     <title>Mochi — AI Talking Bunny</title>
-    <meta name="description" content="Chat with Mochi, a cheerful AI talking bunny. Speech, animation, and conversation in your browser." />
   </head>
   <body>
     <div id="root"></div>

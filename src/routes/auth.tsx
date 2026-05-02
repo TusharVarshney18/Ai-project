@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, Navigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,9 +12,6 @@ const credsSchema = z.object({
 
 type Mode = "login" | "register" | "forgot";
 
-/**
- * ✅ FINAL REDIRECT FIX (works everywhere)
- */
 const getRedirectUrl = () => {
   return import.meta.env.VITE_APP_URL || window.location.origin;
 };
@@ -29,6 +27,7 @@ function AuthPage() {
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -43,15 +42,11 @@ function AuthPage() {
     if (mode === "forgot") {
       const parsed = z.string().email().safeParse(email);
       if (!parsed.success) return setError("Invalid email");
-
       setBusy(true);
-
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${getRedirectUrl()}/reset-password`,
       });
-
       setBusy(false);
-
       if (error) setError(error.message);
       else setInfo("Reset link sent to your email.");
       return;
@@ -61,27 +56,18 @@ function AuthPage() {
     if (!parsed.success) return setError(parsed.error.issues[0].message);
 
     setBusy(true);
-
     try {
       if (mode === "register") {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            emailRedirectTo: getRedirectUrl(),
-          },
+          options: { emailRedirectTo: getRedirectUrl() },
         });
-
         if (error) throw error;
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
-
       navigate({ to: "/" });
     } catch (err: any) {
       setError(err.message || "Auth failed");
@@ -92,14 +78,10 @@ function AuthPage() {
 
   const onGoogle = async () => {
     setBusy(true);
-
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: {
-        redirectTo: getRedirectUrl(),
-      },
+      options: { redirectTo: getRedirectUrl() },
     });
-
     if (error) {
       setBusy(false);
       setError(error.message);
@@ -109,15 +91,13 @@ function AuthPage() {
   return (
     <main className="relative min-h-screen flex items-center justify-center overflow-hidden">
 
-      {/* BACKGROUND */}
+      {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-200 via-sky-100 to-blue-300" />
       <div className="absolute -top-20 -right-20 w-[320px] h-[320px] rounded-full bg-yellow-200/40 blur-3xl" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_10%,rgba(255,248,220,0.35),transparent_60%)]" />
-
-      {/* CLOUDS */}
       <Clouds />
 
-      {/* CARD */}
+      {/* Card */}
       <div className="relative z-10 w-full max-w-md mx-4">
         <div className="bg-white/70 backdrop-blur-2xl border border-white/80 rounded-3xl p-8 shadow-[0_20px_60px_rgba(80,130,180,0.2)]">
 
@@ -125,7 +105,6 @@ function AuthPage() {
             <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-white shadow flex items-center justify-center">
               🐰
             </div>
-
             <h1 className="text-xl font-semibold text-gray-800">
               {mode === "login" && "Sign in"}
               {mode === "register" && "Create account"}
@@ -146,7 +125,6 @@ function AuthPage() {
           )}
 
           <form onSubmit={onSubmit} className="space-y-4">
-
             <input
               type="email"
               placeholder="Email"
@@ -156,13 +134,23 @@ function AuthPage() {
             />
 
             {mode !== "forgot" && (
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-12 px-4 rounded-xl bg-white border border-blue-200"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full h-12 px-4 pr-12 rounded-xl bg-white border border-blue-200"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             )}
 
             {mode === "login" && (
@@ -189,25 +177,17 @@ function AuthPage() {
             {mode === "login" && (
               <>
                 No account?
-                <button onClick={() => setMode("register")} className="ml-1 text-blue-600">
-                  Sign up
-                </button>
+                <button onClick={() => setMode("register")} className="ml-1 text-blue-600">Sign up</button>
               </>
             )}
-
             {mode === "register" && (
               <>
                 Already have one?
-                <button onClick={() => setMode("login")} className="ml-1 text-blue-600">
-                  Sign in
-                </button>
+                <button onClick={() => setMode("login")} className="ml-1 text-blue-600">Sign in</button>
               </>
             )}
-
             {mode === "forgot" && (
-              <button onClick={() => setMode("login")} className="text-blue-600">
-                Back
-              </button>
+              <button onClick={() => setMode("login")} className="text-blue-600">Back</button>
             )}
           </div>
 

@@ -63,6 +63,8 @@
   --shadow-elegant: 0 20px 60px -20px oklch(0.1 0.05 280 / 0.6);
 }
 
+
+
 @layer base {
   * { border-color: var(--border); } /* ✅ FIXED */
   html, body { height: 100%; }
@@ -110,4 +112,29 @@
 
 .shadow-glow {
   box-shadow: var(--shadow-glow);
+}
+
+@layer base {
+  body {
+    /* FIX 3: stops browser pull-to-refresh hijacking the chat scroll */
+    overscroll-behavior-y: none;
+ 
+    /* Prevents long-press text selection on bunny / UI chrome */
+    -webkit-user-select: none;
+    user-select: none;
+  }
+ 
+  /* Re-enable text selection inside chat messages so users can copy */
+  .allow-select {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+ 
+  /* Safe area utility — use on any fixed bottom bar */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
 }
