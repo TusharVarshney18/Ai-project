@@ -79,11 +79,25 @@ function Accessory({ b }: { b: BunnyConfig }) {
   if (b.accessory === "none") return null;
 
   if (b.accessory === "moon") {
-    return <path d="M 20 7 A 6 6 0 1 0 25 17 A 5 5 0 1 1 20 7 Z" fill={b.accessoryColor} opacity="0.95" />;
+    return (
+      <path
+        d="M 20 7 A 6 6 0 1 0 25 17 A 5 5 0 1 1 20 7 Z"
+        fill={b.accessoryColor}
+        opacity="0.95"
+      />
+    );
   }
 
   if (b.accessory === "headband") {
-    return <path d="M 8 14 Q 20 5 32 14" fill="none" stroke={b.accessoryColor} strokeWidth="2.3" strokeLinecap="round" />;
+    return (
+      <path
+        d="M 8 14 Q 20 5 32 14"
+        fill="none"
+        stroke={b.accessoryColor}
+        strokeWidth="2.3"
+        strokeLinecap="round"
+      />
+    );
   }
 
   if (b.accessory === "polka-bow" || b.accessory === "bow") {
@@ -117,7 +131,13 @@ function BunnyMini({ b }: { b: BunnyConfig }) {
       <circle cx="16.8" cy="23.2" r="1.2" fill={b.eyeColor} />
       <circle cx="23.8" cy="23.2" r="1.2" fill={b.eyeColor} />
       <circle cx="20" cy="26.8" r="1.1" fill={b.noseColor} />
-      <path d="M 17.8 29.4 Q 20 31 22.2 29.4" fill="none" stroke={b.mouthColor} strokeWidth="1.2" strokeLinecap="round" />
+      <path
+        d="M 17.8 29.4 Q 20 31 22.2 29.4"
+        fill="none"
+        stroke={b.mouthColor}
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -176,12 +196,8 @@ export function BunnyPicker({ current, onSelect, disabled }: Props) {
 
             {/* Text */}
             <div className="flex-1 min-w-0">
-              <span className="block truncate text-sm font-semibold text-gray-800">
-                {b.name}
-              </span>
-              <span className="text-[11px] text-gray-500 truncate block">
-                {styleText}
-              </span>
+              <span className="block truncate text-sm font-semibold text-gray-800">{b.name}</span>
+              <span className="text-[11px] text-gray-500 truncate block">{styleText}</span>
             </div>
 
             {/* Selected indicator */}

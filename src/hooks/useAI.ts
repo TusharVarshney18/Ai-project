@@ -14,56 +14,46 @@ export function useAI() {
   const [emotion, setEmotion] = useState<Emotion>("happy");
   const [error, setError] = useState<string | null>(null);
 
-const ask = useCallback(
-  async (text: string): Promise<{ reply: string; emotion: Emotion } | null> => {
-    const trimmed = text.trim();
-    if (!trimmed) return null;
+  const ask = useCallback(
+    async (text: string): Promise<{ reply: string; emotion: Emotion } | null> => {
+      const trimmed = text.trim();
+      if (!trimmed) return null;
 
-    setError(null);
-    setState("thinking");
-    setEmotion("curious");
+      setError(null);
+      setState("thinking");
+      setEmotion("curious");
 
-    try {
-      // ✅ build from current state (NOT inside setState)
-      const nextMessages: ChatMessage[] = [
-        ...messages,
-        { role: "user", content: trimmed },
-      ];
+      try {
+        // ✅ build from current state (NOT inside setState)
+        const nextMessages: ChatMessage[] = [...messages, { role: "user", content: trimmed }];
 
-      // ✅ update UI immediately
-      setMessages(nextMessages);
+        // ✅ update UI immediately
+        setMessages(nextMessages);
 
-      // ✅ send correct full history
-      const result = await sendChat(nextMessages);
+        // ✅ send correct full history
+        const result = await sendChat(nextMessages);
 
-      // ✅ append AI reply
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: result.reply },
-      ]);
+        // ✅ append AI reply
+        setMessages((prev) => [...prev, { role: "assistant", content: result.reply }]);
 
-      setEmotion(result.emotion ?? "neutral");
-      setState("idle");
+        setEmotion(result.emotion ?? "neutral");
+        setState("idle");
 
-      return result;
+        return result;
+      } catch (e: any) {
+        const msg = e?.message ?? "Something went wrong.";
 
-    } catch (e: any) {
-      const msg = e?.message ?? "Something went wrong.";
+        setError(msg);
+        setMessages((prev) => [...prev, { role: "assistant", content: `(${msg})` }]);
 
-      setError(msg);
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: `(${msg})` },
-      ]);
+        setEmotion("sad");
+        setState("idle");
 
-      setEmotion("sad");
-      setState("idle");
-
-      return null;
-    }
-  },
-  [messages] // ✅ IMPORTANT dependency
-);
+        return null;
+      }
+    },
+    [messages], // ✅ IMPORTANT dependency
+  );
 
   const reset = useCallback(() => {
     setMessages([INITIAL_MESSAGE]);

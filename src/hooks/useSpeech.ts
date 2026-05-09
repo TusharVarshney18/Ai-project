@@ -30,13 +30,15 @@ export function useSpeech({ onStart, onEnd }: Opts = {}) {
   // Smoothly decay mouth level between boundary events so the jaw closes naturally.
   useEffect(() => {
     if (!isSpeaking) return;
-    let raf = 0;
+    let raf: number | null = null;
     const tick = () => {
       setMouthLevel((m) => (m > 0.02 ? m * 0.82 : 0));
       raf = window.requestAnimationFrame(tick);
     };
     raf = window.requestAnimationFrame(tick);
-    return () => window.cancelAnimationFrame(raf);
+    return () => {
+      if (raf !== null) window.cancelAnimationFrame(raf);
+    };
   }, [isSpeaking]);
 
   const speak = useCallback(
@@ -50,7 +52,9 @@ export function useSpeech({ onStart, onEnd }: Opts = {}) {
       const voices = window.speechSynthesis.getVoices();
       const preferred =
         voices.find((v) => /child|kid|junior/i.test(v.name) && v.lang.startsWith("en")) ||
-        voices.find((v) => /(samantha|karen|tessa|victoria|zira|google.*us.*english)/i.test(v.name)) ||
+        voices.find((v) =>
+          /(samantha|karen|tessa|victoria|zira|google.*us.*english)/i.test(v.name),
+        ) ||
         voices.find((v) => /female/i.test(v.name) && v.lang.startsWith("en")) ||
         voices.find((v) => v.lang.startsWith("en"));
       if (preferred) u.voice = preferred;
@@ -60,11 +64,7 @@ export function useSpeech({ onStart, onEnd }: Opts = {}) {
         setMouthLevel(0.4);
         onStart?.();
       };
-      u.onend = () => {
-        setIsSpeaking(false);
-        setMouthLevel(0);
-        onEnd?.();
-      };
+
       u.onerror = () => {
         setIsSpeaking(false);
         setMouthLevel(0);
@@ -78,15 +78,21 @@ export function useSpeech({ onStart, onEnd }: Opts = {}) {
         const chunk = len > 0 ? text.slice(start, start + len) : text.slice(start, start + 6);
         const level = estimateMouthLevel(chunk);
         setMouthLevel(Math.min(1, level + (Math.random() - 0.5) * 0.08));
-        if (decayRef.current) window.clearTimeout(decayRef.current);
+        if (decayRef.current !== null) window.clearTimeout(decayRef.current);
         decayRef.current = window.setTimeout(() => {
           setMouthLevel((m) => Math.min(m, 0.15));
         }, 140);
       };
+      u.onend = () => {
+        setIsSpeaking(false);
+        setMouthLevel(0);
+        if (decayRef.current !== null) window.clearTimeout(decayRef.current);
+        onEnd?.();
+      };
       utterRef.current = u;
       window.speechSynthesis.speak(u);
     },
-    [onStart, onEnd]
+    [onStart, onEnd],
   );
 
   const stop = useCallback(() => {
@@ -94,6 +100,7 @@ export function useSpeech({ onStart, onEnd }: Opts = {}) {
     window.speechSynthesis.cancel();
     setIsSpeaking(false);
     setMouthLevel(0);
+    if (decayRef.current !== null) window.clearTimeout(decayRef.current);
   }, []);
 
   return { speak, stop, isSpeaking, supported, mouthLevel };

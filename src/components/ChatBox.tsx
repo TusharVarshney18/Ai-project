@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import { Mic, MicOff, Send, Square } from "lucide-react";
 import type { ChatMessage } from "@/services/llmService";
 import type { AIState } from "@/hooks/useAI";
+import type { BunnyConfig } from "@/lib/bunnies";
 import { useSpeechRecognition } from "@/hooks/useSpeech";
 
 type Props = {
@@ -11,13 +12,18 @@ type Props = {
   onSend: (text: string) => void;
   onStop: () => void;
   inputRef?: React.RefObject<HTMLInputElement>;
+  bunnyTheme?: BunnyConfig;
 };
 
 function haptic() {
-  try { navigator.vibrate?.(10); } catch {}
+  try {
+    navigator.vibrate?.(10);
+  } catch (_error) {
+    // Vibration API not supported, ignore silently
+  }
 }
 
-export function ChatBox({ messages, state, onSend, onStop, inputRef }: Props) {
+export function ChatBox({ messages, state, onSend, onStop, inputRef, bunnyTheme }: Props) {
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const internalInputRef = useRef<HTMLInputElement>(null);
@@ -30,7 +36,7 @@ export function ChatBox({ messages, state, onSend, onStop, inputRef }: Props) {
     requestAnimationFrame(() => {
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     });
-  }, [messages.length]);
+  }, [messages]);
 
   /* ───────────── Memoized Messages ───────────── */
   const renderedMessages = useMemo(() => {
@@ -63,10 +69,12 @@ export function ChatBox({ messages, state, onSend, onStop, inputRef }: Props) {
 
   /* ───────────── UI ───────────── */
   return (
-    <div className="h-[100dvh] md:h-[600px] max-w-2xl mx-auto flex flex-col overflow-hidden rounded-3xl
-      bg-gradient-to-br from-[#0b1220] via-[#0f172a] to-[#1e293b]
-      border border-white/10 shadow-[0_40px_120px_rgba(0,0,0,0.6)]">
-
+    <div
+      className="h-[56dvh] min-h-[360px] max-h-[680px] md:h-[600px] max-w-2xl mx-auto flex flex-col overflow-hidden rounded-3xl border border-white/10 shadow-[0_40px_120px_rgba(0,0,0,0.6)]"
+      style={{
+        backgroundImage: `linear-gradient(135deg, ${bunnyTheme?.furDark ?? "#0b1220"} 0%, ${bunnyTheme?.accent ?? "#4f46e5"} 56%, ${bunnyTheme?.eyeIrisColor ?? "#6366f1"} 100%)`,
+      }}
+    >
       {/* Header */}
       <div className="px-5 py-4 border-b border-white/10 flex justify-between items-center">
         <div>
@@ -94,9 +102,16 @@ export function ChatBox({ messages, state, onSend, onStop, inputRef }: Props) {
               <div
                 className={`max-w-[78%] px-4 py-3 text-[15px] leading-relaxed rounded-2xl ${
                   m.role === "user"
-                    ? "bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-br-sm"
+                    ? "text-white rounded-br-sm"
                     : "bg-white/10 text-white border border-white/10 rounded-bl-sm"
                 }`}
+                style={
+                  m.role === "user"
+                    ? {
+                        backgroundImage: `linear-gradient(135deg, ${bunnyTheme?.accent ?? "#6366f1"}, ${bunnyTheme?.accessoryColor ?? "#8b5cf6"})`,
+                      }
+                    : undefined
+                }
               >
                 {m.content}
               </div>
@@ -165,8 +180,11 @@ export function ChatBox({ messages, state, onSend, onStop, inputRef }: Props) {
             disabled={!input.trim() || state === "thinking"}
             onClick={haptic}
             className="h-11 w-11 flex items-center justify-center rounded-full
-              bg-gradient-to-br from-indigo-500 to-purple-600 text-white
+              text-white
               transition hover:scale-105 active:scale-95 disabled:opacity-50"
+            style={{
+              backgroundImage: `linear-gradient(135deg, ${bunnyTheme?.accent ?? "#6366f1"}, ${bunnyTheme?.accessoryColor ?? "#8b5cf6"})`,
+            }}
           >
             <Send size={18} />
           </button>

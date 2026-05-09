@@ -1,13 +1,23 @@
-import { createRouter, createRoute, createRootRoute, useRouter, Outlet } from "@tanstack/react-router";
+import {
+  createRouter,
+  createRoute,
+  createRootRoute,
+  useRouter,
+  Outlet,
+} from "@tanstack/react-router";
 import { lazy } from "react";
 
 // Lazy load routes
 const IndexRoute = lazy(() => import("./routes/index").then((m) => ({ default: m.Route })));
 const AuthRoute = lazy(() => import("./routes/auth").then((m) => ({ default: m.Route })));
-const ResetPasswordRoute = lazy(() => import("./routes/reset-password").then((m) => ({ default: m.Route })));
+const ResetPasswordRoute = lazy(() =>
+  import("./routes/reset-password").then((m) => ({ default: m.Route })),
+);
 const PrivacyRoute = lazy(() => import("./routes/privacy").then((m) => ({ default: m.Route })));
 const TermsRoute = lazy(() => import("./routes/terms").then((m) => ({ default: m.Route })));
-const ApiDeleteAccountRoute = lazy(() => import("./routes/api.delete-account").then((m) => ({ default: m.Route })));
+const ApiDeleteAccountRoute = lazy(() =>
+  import("./routes/api.delete-account").then((m) => ({ default: m.Route })),
+);
 
 // Root route
 const rootRoute = createRootRoute({

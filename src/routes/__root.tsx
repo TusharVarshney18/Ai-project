@@ -30,7 +30,11 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Mochi — AI Talking Bunny" },
-      { name: "description", content: "Chat with Mochi, a cheerful AI talking bunny. Speech, animation, and conversation in your browser." },
+      {
+        name: "description",
+        content:
+          "Chat with Mochi, a cheerful AI talking bunny. Speech, animation, and conversation in your browser.",
+      },
     ],
     links: [
       {

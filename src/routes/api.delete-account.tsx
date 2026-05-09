@@ -15,16 +15,16 @@ export const deleteCurrentUser = async () => {
 
   // Call Supabase Edge Function for account deletion
   const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-account`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
   });
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(error || 'Failed to delete account');
+    throw new Error(error || "Failed to delete account");
   }
 
   return { success: true };

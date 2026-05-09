@@ -13,7 +13,8 @@ export function useTheme() {
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
-    const stored = (typeof localStorage !== "undefined" && localStorage.getItem(STORAGE_KEY)) as Theme | null;
+    const stored = (typeof localStorage !== "undefined" &&
+      localStorage.getItem(STORAGE_KEY)) as Theme | null;
     const initial: Theme = stored ?? "light";
     setTheme(initial);
     applyTheme(initial);
@@ -23,7 +24,11 @@ export function useTheme() {
     const next: Theme = theme === "light" ? "dark" : "light";
     setTheme(next);
     applyTheme(next);
-    try { localStorage.setItem(STORAGE_KEY, next); } catch {}
+    try {
+      localStorage.setItem(STORAGE_KEY, next);
+    } catch (_error) {
+      // localStorage not available, theme preference not persisted
+    }
   };
 
   return { theme, toggle };

@@ -2,8 +2,7 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 // ✅ Stronger system prompt (forces behavior)
@@ -40,10 +39,10 @@ serve(async (req) => {
     const body = await req.json();
 
     if (!body || !Array.isArray(body.messages)) {
-      return new Response(
-        JSON.stringify({ error: "Invalid messages format" }),
-        { status: 400, headers: corsHeaders }
-      );
+      return new Response(JSON.stringify({ error: "Invalid messages format" }), {
+        status: 400,
+        headers: corsHeaders,
+      });
     }
 
     const safeMessages = body.messages.slice(-MAX_MESSAGES);
@@ -56,25 +55,19 @@ serve(async (req) => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
 
-    const response = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${GROQ_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        signal: controller.signal,
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          temperature: 0.7,
-          messages: [
-            { role: "system", content: SYSTEM_PROMPT },
-            ...safeMessages,
-          ],
-        }),
-      }
-    );
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${GROQ_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      signal: controller.signal,
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        temperature: 0.7,
+        messages: [{ role: "system", content: SYSTEM_PROMPT }, ...safeMessages],
+      }),
+    });
 
     clearTimeout(timeout);
 
@@ -82,18 +75,17 @@ serve(async (req) => {
       const err = await response.text();
       console.error("Groq error:", err);
 
-      return new Response(
-        JSON.stringify({ error: "AI request failed" }),
-        { status: 500, headers: corsHeaders }
-      );
+      return new Response(JSON.stringify({ error: "AI request failed" }), {
+        status: 500,
+        headers: corsHeaders,
+      });
     }
 
     const data = await response.json();
     const raw = data?.choices?.[0]?.message?.content?.trim();
 
     let reply = "";
-    let emotion: "happy" | "curious" | "surprised" | "sad" | "neutral" =
-      "neutral";
+    let emotion: "happy" | "curious" | "surprised" | "sad" | "neutral" = "neutral";
 
     // ✅ 1. Try parsing JSON response
     try {
@@ -106,17 +98,9 @@ serve(async (req) => {
 
       const text = reply.toLowerCase();
 
-      if (
-        text.includes("sorry") ||
-        text.includes("hurt") ||
-        text.includes("bad")
-      ) {
+      if (text.includes("sorry") || text.includes("hurt") || text.includes("bad")) {
         emotion = "sad";
-      } else if (
-        text.includes("wow") ||
-        text.includes("amazing") ||
-        text.includes("incredible")
-      ) {
+      } else if (text.includes("wow") || text.includes("amazing") || text.includes("incredible")) {
         emotion = "surprised";
       } else if (text.includes("?")) {
         emotion = "curious";
@@ -136,12 +120,9 @@ serve(async (req) => {
     const valid = ["happy", "curious", "surprised", "sad", "neutral"];
     if (!valid.includes(emotion)) emotion = "neutral";
 
-    return new Response(
-      JSON.stringify({ reply, emotion }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ reply, emotion }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (err) {
     console.error("Function crash:", err);
 
@@ -149,7 +130,7 @@ serve(async (req) => {
       JSON.stringify({
         error: err instanceof Error ? err.message : "Unknown error",
       }),
-      { status: 500, headers: corsHeaders }
+      { status: 500, headers: corsHeaders },
     );
   }
 });

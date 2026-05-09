@@ -40,22 +40,54 @@ const StaticLayer = memo(function StaticLayer({ b }: { b: BunnyConfig }) {
 
       {/* Ears (slightly tilted for lively look) */}
       <g transform="rotate(-56 86 102)">
-        <ellipse cx="86" cy="102" rx="22" ry="58" fill={`url(#${fid})`} stroke={b.furStroke} strokeWidth="2" />
+        <ellipse
+          cx="86"
+          cy="102"
+          rx="22"
+          ry="58"
+          fill={`url(#${fid})`}
+          stroke={b.furStroke}
+          strokeWidth="2"
+        />
         <ellipse cx="86" cy="108" rx="9" ry="37" fill={`url(#${eid})`} opacity="0.88" />
       </g>
       <g transform="rotate(56 174 102)">
-        <ellipse cx="174" cy="102" rx="22" ry="58" fill={`url(#${fid})`} stroke={b.furStroke} strokeWidth="2" />
+        <ellipse
+          cx="174"
+          cy="102"
+          rx="22"
+          ry="58"
+          fill={`url(#${fid})`}
+          stroke={b.furStroke}
+          strokeWidth="2"
+        />
         <ellipse cx="174" cy="108" rx="9" ry="37" fill={`url(#${eid})`} opacity="0.88" />
       </g>
 
       {/* Head + chubby cheeks */}
-      <ellipse cx="130" cy="176" rx="94" ry="88" fill={`url(#${fid})`} stroke={b.furStroke} strokeWidth="2.4" />
+      <ellipse
+        cx="130"
+        cy="176"
+        rx="94"
+        ry="88"
+        fill={`url(#${fid})`}
+        stroke={b.furStroke}
+        strokeWidth="2.4"
+      />
       <ellipse cx="84" cy="194" rx="22" ry="24" fill={b.furLight} opacity="0.44" />
       <ellipse cx="176" cy="194" rx="22" ry="24" fill={b.furLight} opacity="0.44" />
       <ellipse cx="130" cy="216" rx="50" ry="32" fill={`url(#${muzzleId})`} opacity="0.62" />
 
       {/* Tiny plush body + paws (for fluffy look) */}
-      <ellipse cx="130" cy="270" rx="52" ry="34" fill={`url(#${fid})`} stroke={b.furStroke} strokeOpacity="0.4" />
+      <ellipse
+        cx="130"
+        cy="270"
+        rx="52"
+        ry="34"
+        fill={`url(#${fid})`}
+        stroke={b.furStroke}
+        strokeOpacity="0.4"
+      />
       <ellipse cx="104" cy="252" rx="13" ry="11" fill={b.furLight} opacity="0.95" />
       <ellipse cx="156" cy="252" rx="13" ry="11" fill={b.furLight} opacity="0.95" />
     </>
@@ -101,15 +133,39 @@ const FaceLayer = memo(function FaceLayer({
     <>
       {/* Brows / expression lines */}
       <g stroke={b.mouthColor} strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.82">
-        <path d={isSad ? "M 82 153 Q 94 147 106 154" : isCurious ? "M 84 154 Q 96 146 108 151" : "M 84 153 Q 96 146 108 152"} />
-        <path d={isSad ? "M 154 154 Q 166 147 178 153" : isCurious ? "M 152 151 Q 164 146 176 154" : "M 152 152 Q 164 146 176 153"} />
+        <path
+          d={
+            isSad
+              ? "M 82 153 Q 94 147 106 154"
+              : isCurious
+                ? "M 84 154 Q 96 146 108 151"
+                : "M 84 153 Q 96 146 108 152"
+          }
+        />
+        <path
+          d={
+            isSad
+              ? "M 154 154 Q 166 147 178 153"
+              : isCurious
+                ? "M 152 151 Q 164 146 176 154"
+                : "M 152 152 Q 164 146 176 153"
+          }
+        />
       </g>
 
       {/* Eyes */}
       {[left, right].map((cx) => (
         <g key={cx}>
           <ellipse cx={cx} cy={eyeY} rx={18.5} ry={16.8} fill="white" opacity="0.99" />
-          <ellipse cx={cx} cy={eyeY} rx={18.5} ry={16.8} fill="none" stroke={b.furStroke} strokeOpacity="0.24" />
+          <ellipse
+            cx={cx}
+            cy={eyeY}
+            rx={18.5}
+            ry={16.8}
+            fill="none"
+            stroke={b.furStroke}
+            strokeOpacity="0.24"
+          />
           <ellipse cx={cx} cy={eyeY - 8} rx={17} ry={6.8} fill={b.furLight} opacity="0.55" />
           <ellipse cx={cx} cy={eyeY + 8.4} rx={15} ry={4.2} fill="oklch(1 0 0 / 0.18)" />
 
@@ -124,7 +180,14 @@ const FaceLayer = memo(function FaceLayer({
           <circle cx={cx + 0.5} cy={eyeY - 0.6} r={0.8} fill="oklch(1 0 0 / 0.65)" />
 
           {/* lashes */}
-          <path d={`M ${cx - 14} ${eyeY - 11} Q ${cx} ${eyeY - 18} ${cx + 14} ${eyeY - 11}`} fill="none" stroke={b.mouthColor} strokeWidth="1.4" strokeLinecap="round" opacity="0.8" />
+          <path
+            d={`M ${cx - 14} ${eyeY - 11} Q ${cx} ${eyeY - 18} ${cx + 14} ${eyeY - 11}`}
+            fill="none"
+            stroke={b.mouthColor}
+            strokeWidth="1.4"
+            strokeLinecap="round"
+            opacity="0.8"
+          />
         </g>
       ))}
       {[left, right].map((cx) => (
@@ -135,7 +198,12 @@ const FaceLayer = memo(function FaceLayer({
           rx="18"
           fill={b.furLight}
           animate={{ ry: isSurprised ? 0 : [0, 0, 0, 13.5, 0, 0] }}
-          transition={{ duration: 9, repeat: Infinity, times: [0, 0.6, 0.64, 0.66, 0.7, 1], ease: "easeInOut" }}
+          transition={{
+            duration: 9,
+            repeat: Infinity,
+            times: [0, 0.6, 0.64, 0.66, 0.7, 1],
+            ease: "easeInOut",
+          }}
         />
       ))}
 
@@ -221,9 +289,7 @@ const EffectsLayer = memo(function EffectsLayer({
           r="18"
           fill={b.cheekColor}
           animate={
-            isSpeaking
-              ? { scale: [1, 1.1, 1], opacity: [0.46, 0.75, 0.46] }
-              : { opacity: 0.54 }
+            isSpeaking ? { scale: [1, 1.1, 1], opacity: [0.46, 0.75, 0.46] } : { opacity: 0.54 }
           }
           transition={{ duration: 1.1, repeat: Infinity }}
         />
@@ -240,18 +306,66 @@ const StyleLayer = memo(function StyleLayer({ b }: { b: BunnyConfig }) {
     <>
       {showGlasses && (
         <g opacity="0.95">
-          <ellipse cx="99" cy="173" rx="20" ry="15" fill="none" stroke={b.accessoryColor} strokeWidth="3" />
-          <ellipse cx="161" cy="173" rx="20" ry="15" fill="none" stroke={b.accessoryColor} strokeWidth="3" />
-          <line x1="119" y1="173" x2="141" y2="173" stroke={b.accessoryColorAlt} strokeWidth="2.8" strokeLinecap="round" />
-          <line x1="79" y1="171" x2="68" y2="168" stroke={b.accessoryColorAlt} strokeWidth="2" strokeLinecap="round" opacity="0.75" />
-          <line x1="181" y1="171" x2="192" y2="168" stroke={b.accessoryColorAlt} strokeWidth="2" strokeLinecap="round" opacity="0.75" />
+          <ellipse
+            cx="99"
+            cy="173"
+            rx="20"
+            ry="15"
+            fill="none"
+            stroke={b.accessoryColor}
+            strokeWidth="3"
+          />
+          <ellipse
+            cx="161"
+            cy="173"
+            rx="20"
+            ry="15"
+            fill="none"
+            stroke={b.accessoryColor}
+            strokeWidth="3"
+          />
+          <line
+            x1="119"
+            y1="173"
+            x2="141"
+            y2="173"
+            stroke={b.accessoryColorAlt}
+            strokeWidth="2.8"
+            strokeLinecap="round"
+          />
+          <line
+            x1="79"
+            y1="171"
+            x2="68"
+            y2="168"
+            stroke={b.accessoryColorAlt}
+            strokeWidth="2"
+            strokeLinecap="round"
+            opacity="0.75"
+          />
+          <line
+            x1="181"
+            y1="171"
+            x2="192"
+            y2="168"
+            stroke={b.accessoryColorAlt}
+            strokeWidth="2"
+            strokeLinecap="round"
+            opacity="0.75"
+          />
         </g>
       )}
 
       {showLipstick && (
         <g>
           <ellipse cx="130" cy="234" rx="18" ry="7" fill={b.accessoryColor} opacity="0.22" />
-          <path d="M 114 231 Q 130 241 146 231" fill="none" stroke={b.accessoryColor} strokeWidth="2.2" strokeLinecap="round" />
+          <path
+            d="M 114 231 Q 130 241 146 231"
+            fill="none"
+            stroke={b.accessoryColor}
+            strokeWidth="2.2"
+            strokeLinecap="round"
+          />
           <circle cx="145" cy="229" r="1.8" fill="white" opacity="0.65" />
         </g>
       )}
@@ -280,11 +394,7 @@ export function Avatar({
         style={{
           background: `radial-gradient(circle, ${b.glow}, transparent 75%)`,
         }}
-        animate={
-          isSpeaking || isThinking
-            ? { scale: [1, 1.05, 1] }
-            : { scale: 1 }
-        }
+        animate={isSpeaking || isThinking ? { scale: [1, 1.05, 1] } : { scale: 1 }}
         transition={{ duration: 1 }}
       />
 
@@ -310,12 +420,7 @@ export function Avatar({
               <circle cx="142" cy="116" r="7" fill={b.accessoryColorAlt} opacity="0.9" />
             </g>
           )}
-          <FaceLayer
-            isSpeaking={isSpeaking}
-            emotion={emotion}
-            mouthLevel={mouthLevel}
-            b={b}
-          />
+          <FaceLayer isSpeaking={isSpeaking} emotion={emotion} mouthLevel={mouthLevel} b={b} />
           <StyleLayer b={b} />
         </svg>
       </motion.div>

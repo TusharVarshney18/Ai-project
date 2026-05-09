@@ -12,7 +12,13 @@ function getCtx(): AudioContext | null {
   return ctx;
 }
 
-function tone(freq: number, dur: number, type: OscillatorType = "sine", gain = 0.15, attack = 0.005) {
+function tone(
+  freq: number,
+  dur: number,
+  type: OscillatorType = "sine",
+  gain = 0.15,
+  attack = 0.005,
+) {
   const c = getCtx();
   if (!c) return;
   if (c.state === "suspended") c.resume();

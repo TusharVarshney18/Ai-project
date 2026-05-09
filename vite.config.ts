@@ -14,10 +14,14 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['@tanstack/react-router'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-popover', '@radix-ui/react-dropdown-menu'],
-          supabase: ['@supabase/supabase-js'],
+          vendor: ["react", "react-dom"],
+          router: ["@tanstack/react-router"],
+          ui: [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-popover",
+            "@radix-ui/react-dropdown-menu",
+          ],
+          supabase: ["@supabase/supabase-js"],
         },
       },
     },

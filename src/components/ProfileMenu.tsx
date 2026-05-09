@@ -5,8 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useProfile } from "@/hooks/useProfile";
 import { useTheme } from "@/hooks/useTheme";
@@ -35,8 +42,12 @@ export function ProfileMenu({ userId, email, onLogout, onBunnyChange }: Props) {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  useEffect(() => { setDraft(displayName); }, [displayName]);
-  useEffect(() => { onBunnyChange?.(bunny); }, [bunny, onBunnyChange]);
+  useEffect(() => {
+    setDraft(displayName);
+  }, [displayName]);
+  useEffect(() => {
+    onBunnyChange?.(bunny);
+  }, [bunny, onBunnyChange]);
 
   const label = displayName || email.split("@")[0];
   const initial = (label || "?").charAt(0).toUpperCase();
@@ -46,7 +57,10 @@ export function ProfileMenu({ userId, email, onLogout, onBunnyChange }: Props) {
     setError(null);
     const { error } = await save(draft);
     setBusy(false);
-    if (error) { setError(error); return; }
+    if (error) {
+      setError(error);
+      return;
+    }
     setEditing(false);
   };
 
@@ -107,14 +121,16 @@ export function ProfileMenu({ userId, email, onLogout, onBunnyChange }: Props) {
           background: "var(--popover)",
           color: "var(--popover-foreground)",
           borderColor: "var(--border)",
-          boxShadow: "var(--shadow-elegant), 0 0 0 1px color-mix(in oklab, var(--border) 60%, transparent)",
+          boxShadow:
+            "var(--shadow-elegant), 0 0 0 1px color-mix(in oklab, var(--border) 60%, transparent)",
         }}
       >
         {/* Header gradient banner */}
         <div
           className="relative px-4 pb-4 pt-5"
           style={{
-            background: "linear-gradient(135deg, color-mix(in oklab, var(--primary) 18%, var(--popover)), color-mix(in oklab, var(--accent) 10%, var(--popover)))",
+            background:
+              "linear-gradient(135deg, color-mix(in oklab, var(--primary) 18%, var(--popover)), color-mix(in oklab, var(--accent) 10%, var(--popover)))",
           }}
         >
           {/* Decorative blobs */}
@@ -147,7 +163,6 @@ export function ProfileMenu({ userId, email, onLogout, onBunnyChange }: Props) {
           className="space-y-1 overflow-y-auto px-4 pb-4 pt-3"
           style={{ maxHeight: "calc(100vh - 160px)", background: "var(--popover)" }}
         >
-
           {/* ── Display name ── */}
           <section className="space-y-1.5">
             <Label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
@@ -165,7 +180,11 @@ export function ProfileMenu({ userId, email, onLogout, onBunnyChange }: Props) {
                     className="h-9 rounded-xl text-sm"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") handleSave();
-                      if (e.key === "Escape") { setEditing(false); setDraft(displayName); setError(null); }
+                      if (e.key === "Escape") {
+                        setEditing(false);
+                        setDraft(displayName);
+                        setError(null);
+                      }
                     }}
                   />
                   <Button
@@ -181,14 +200,20 @@ export function ProfileMenu({ userId, email, onLogout, onBunnyChange }: Props) {
                     size="icon"
                     variant="ghost"
                     className="h-9 w-9 shrink-0 rounded-xl"
-                    onClick={() => { setEditing(false); setDraft(displayName); setError(null); }}
+                    onClick={() => {
+                      setEditing(false);
+                      setDraft(displayName);
+                      setError(null);
+                    }}
                     aria-label="Cancel"
                   >
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
                 {error && (
-                  <p className="rounded-lg bg-destructive/10 px-2.5 py-1.5 text-xs text-destructive">{error}</p>
+                  <p className="rounded-lg bg-destructive/10 px-2.5 py-1.5 text-xs text-destructive">
+                    {error}
+                  </p>
                 )}
               </div>
             ) : (
@@ -226,14 +251,18 @@ export function ProfileMenu({ userId, email, onLogout, onBunnyChange }: Props) {
           {/* ── Theme toggle ── */}
           <button
             type="button"
-            onClick={() => { playClick(); toggle(); }}
+            onClick={() => {
+              playClick();
+              toggle();
+            }}
             className="group flex w-full items-center justify-between rounded-xl border border-border/60 bg-muted/40 px-3 py-2.5 text-sm transition-colors hover:bg-muted hover:border-primary/30"
           >
             <span className="flex items-center gap-2 font-medium">
-              {theme === "dark"
-                ? <Moon className="h-4 w-4 text-indigo-400" />
-                : <Sun className="h-4 w-4 text-amber-400" />
-              }
+              {theme === "dark" ? (
+                <Moon className="h-4 w-4 text-indigo-400" />
+              ) : (
+                <Sun className="h-4 w-4 text-amber-400" />
+              )}
               {theme === "dark" ? "Dark theme" : "Light theme"}
             </span>
             <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary transition-colors group-hover:bg-primary/20">
@@ -249,7 +278,10 @@ export function ProfileMenu({ userId, email, onLogout, onBunnyChange }: Props) {
             variant="outline"
             size="sm"
             className="w-full justify-center gap-2 rounded-xl border-border/60 text-sm font-medium transition-all hover:border-primary/30 hover:bg-muted"
-            onClick={() => { setOpen(false); onLogout(); }}
+            onClick={() => {
+              setOpen(false);
+              onLogout();
+            }}
           >
             <LogOut className="h-3.5 w-3.5" />
             Log out
@@ -271,8 +303,8 @@ export function ProfileMenu({ userId, email, onLogout, onBunnyChange }: Props) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete your account?</AlertDialogTitle>
                 <AlertDialogDescription className="text-sm leading-relaxed">
-                  This permanently deletes your account, profile, and all data. This cannot be undone.{" "}
-                  Type{" "}
+                  This permanently deletes your account, profile, and all data. This cannot be
+                  undone. Type{" "}
                   <span className="rounded bg-muted px-1 py-0.5 font-mono font-semibold text-foreground">
                     DELETE
                   </span>{" "}
@@ -287,18 +319,26 @@ export function ProfileMenu({ userId, email, onLogout, onBunnyChange }: Props) {
                 className="rounded-xl"
               />
               {deleteError && (
-                <p className="rounded-lg bg-destructive/10 px-2.5 py-1.5 text-xs text-destructive">{deleteError}</p>
+                <p className="rounded-lg bg-destructive/10 px-2.5 py-1.5 text-xs text-destructive">
+                  {deleteError}
+                </p>
               )}
               <AlertDialogFooter>
                 <AlertDialogCancel
                   className="rounded-xl"
-                  onClick={() => { setConfirmText(""); setDeleteError(null); }}
+                  onClick={() => {
+                    setConfirmText("");
+                    setDeleteError(null);
+                  }}
                 >
                   Cancel
                 </AlertDialogCancel>
                 <AlertDialogAction
                   disabled={confirmText !== "DELETE" || deleting}
-                  onClick={(e) => { e.preventDefault(); handleDelete(); }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDelete();
+                  }}
                   className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-40"
                 >
                   {deleting ? "Deleting…" : "Delete forever"}

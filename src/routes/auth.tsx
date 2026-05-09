@@ -90,7 +90,6 @@ function AuthPage() {
 
   return (
     <main className="relative min-h-screen flex items-center justify-center overflow-hidden">
-
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-200 via-sky-100 to-blue-300" />
       <div className="absolute -top-20 -right-20 w-[320px] h-[320px] rounded-full bg-yellow-200/40 blur-3xl" />
@@ -100,7 +99,6 @@ function AuthPage() {
       {/* Card */}
       <div className="relative z-10 w-full max-w-md mx-4">
         <div className="bg-white/70 backdrop-blur-2xl border border-white/80 rounded-3xl p-8 shadow-[0_20px_60px_rgba(80,130,180,0.2)]">
-
           <div className="text-center mb-6">
             <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-white shadow flex items-center justify-center">
               🐰
@@ -177,20 +175,25 @@ function AuthPage() {
             {mode === "login" && (
               <>
                 No account?
-                <button onClick={() => setMode("register")} className="ml-1 text-blue-600">Sign up</button>
+                <button onClick={() => setMode("register")} className="ml-1 text-blue-600">
+                  Sign up
+                </button>
               </>
             )}
             {mode === "register" && (
               <>
                 Already have one?
-                <button onClick={() => setMode("login")} className="ml-1 text-blue-600">Sign in</button>
+                <button onClick={() => setMode("login")} className="ml-1 text-blue-600">
+                  Sign in
+                </button>
               </>
             )}
             {mode === "forgot" && (
-              <button onClick={() => setMode("login")} className="text-blue-600">Back</button>
+              <button onClick={() => setMode("login")} className="text-blue-600">
+                Back
+              </button>
             )}
           </div>
-
         </div>
       </div>
     </main>

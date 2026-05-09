@@ -26,6 +26,12 @@ export function useProfile(userId: string | undefined) {
         setDisplayName(data?.display_name ?? "");
         setBunnyState(((data as any)?.bunny as BunnyId) ?? "mochi");
         setLoading(false);
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          console.error("Failed to load profile:", error);
+          setLoading(false);
+        }
       });
     return () => {
       cancelled = true;
@@ -47,7 +53,7 @@ export function useProfile(userId: string | undefined) {
       setDisplayName(trimmed);
       return { error: null };
     },
-    [userId]
+    [userId],
   );
 
   const setBunny = useCallback(
@@ -61,7 +67,7 @@ export function useProfile(userId: string | undefined) {
       if (error) return { error: error.message };
       return { error: null };
     },
-    [userId]
+    [userId],
   );
 
   return { displayName, bunny, loading, save, setBunny };

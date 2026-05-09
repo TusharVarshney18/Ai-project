@@ -26,7 +26,12 @@
   --avatar-skin: oklch(0.85 0.08 60);
   --avatar-accent: oklch(0.55 0.2 270);
 
-  --gradient-bg: radial-gradient(ellipse at top, oklch(0.95 0.05 200) 0%, oklch(0.97 0.03 240) 50%, oklch(0.96 0.04 320) 100%);
+  --gradient-bg: radial-gradient(
+    ellipse at top,
+    oklch(0.95 0.05 200) 0%,
+    oklch(0.97 0.03 240) 50%,
+    oklch(0.96 0.04 320) 100%
+  );
   --gradient-primary: linear-gradient(135deg, oklch(0.62 0.18 195), oklch(0.7 0.18 320));
   --gradient-glow: radial-gradient(circle, oklch(0.78 0.18 200 / 0.35), transparent 70%);
   --shadow-glow: 0 0 60px oklch(0.62 0.18 195 / 0.25);
@@ -56,46 +61,84 @@
   --input: oklch(0.28 0.05 280);
   --ring: oklch(0.72 0.18 195);
 
-  --gradient-bg: radial-gradient(ellipse at top, oklch(0.28 0.1 280) 0%, oklch(0.15 0.05 280) 50%, oklch(0.12 0.04 270) 100%);
+  --gradient-bg: radial-gradient(
+    ellipse at top,
+    oklch(0.28 0.1 280) 0%,
+    oklch(0.15 0.05 280) 50%,
+    oklch(0.12 0.04 270) 100%
+  );
   --gradient-primary: linear-gradient(135deg, oklch(0.72 0.18 195), oklch(0.7 0.22 320));
   --gradient-glow: radial-gradient(circle, oklch(0.72 0.18 195 / 0.4), transparent 70%);
   --shadow-glow: 0 0 60px oklch(0.72 0.18 195 / 0.35);
   --shadow-elegant: 0 20px 60px -20px oklch(0.1 0.05 280 / 0.6);
 }
 
-
-
 @layer base {
-  * { border-color: var(--border); } /* ✅ FIXED */
-  html, body { height: 100%; }
+  * {
+    border-color: var(--border);
+  } /* ✅ FIXED */
+  html,
+  body {
+    height: 100%;
+  }
 
   body {
     margin: 0; /* ✅ added for consistency */
     background: var(--gradient-bg);
     background-attachment: fixed;
     color: var(--foreground); /* ✅ FIXED */
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-    transition: background 0.4s ease, color 0.3s ease;
+    font-family:
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      sans-serif;
+    transition:
+      background 0.4s ease,
+      color 0.3s ease;
   }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.08); }
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
 }
 
 @keyframes blink {
-  0%, 92%, 100% { transform: scaleY(1); }
-  94%, 98% { transform: scaleY(0.05); }
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  94%,
+  98% {
+    transform: scaleY(0.05);
+  }
 }
 
-.animate-float { animation: float 4s ease-in-out infinite; }
-.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
 
 .glass {
   background: color-mix(in oklab, var(--card) 70%, transparent);
@@ -118,18 +161,18 @@
   body {
     /* FIX 3: stops browser pull-to-refresh hijacking the chat scroll */
     overscroll-behavior-y: none;
- 
+
     /* Prevents long-press text selection on bunny / UI chrome */
     -webkit-user-select: none;
     user-select: none;
   }
- 
+
   /* Re-enable text selection inside chat messages so users can copy */
   .allow-select {
     -webkit-user-select: text;
     user-select: text;
   }
- 
+
   /* Safe area utility — use on any fixed bottom bar */
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom);
