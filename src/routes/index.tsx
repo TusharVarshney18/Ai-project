@@ -1,14 +1,18 @@
 import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
+
 import { Avatar } from "@/components/Avatar";
 import { ChatBox } from "@/components/ChatBox";
 import { ProfileMenu } from "@/components/ProfileMenu";
 import { StarField } from "@/components/StarField";
+
 import { useAI } from "@/hooks/useAI";
 import { useSpeech } from "@/hooks/useSpeech";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+
 import { supabase } from "@/integrations/supabase/client";
+
 import { getBunny, type BunnyId } from "@/lib/bunnies";
 import { playBoop, playHop } from "@/lib/sfx";
 
@@ -16,11 +20,11 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "Mochi — AI Talking Bunny" },
+      { title: "Mochi — Bunny AI Assistant" },
       {
         name: "description",
         content:
-          "Chat with Mochi, a cheerful AI talking bunny. Speech, animation, and conversation in your browser.",
+          "Chat with Mochi, your premium AI bunny assistant powered by Bunny AI.",
       },
     ],
   }),
@@ -28,155 +32,319 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { user, loading } = useAuth();
+
   const navigate = useNavigate();
-  const { messages, state, setState, emotion, ask, reset } = useAI();
-  const { speak, stop, isSpeaking, mouthLevel } = useSpeech({
+
+  const { messages, state, setState, emotion, ask, reset } =
+    useAI();
+
+  const {
+    speak,
+    stop,
+    isSpeaking,
+    mouthLevel,
+  } = useSpeech({
     onStart: () => setState("speaking"),
     onEnd: () => setState("idle"),
   });
+
   const { bunny: profileBunny } = useProfile(user?.id);
-  const [bunny, setBunny] = useState<BunnyId>("mochi");
-  const [isAndroid, setIsAndroid] = useState(false);
+
+  const [bunny, setBunny] =
+    useState<BunnyId>("mochi");
 
   useEffect(() => {
     setBunny(profileBunny);
   }, [profileBunny]);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+    if (
+      typeof window !== "undefined" &&
+      "speechSynthesis" in window
+    ) {
       window.speechSynthesis.getVoices();
     }
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    setIsAndroid(/android/i.test(window.navigator.userAgent));
-  }, []);
-
-  useEffect(() => {
-    if (!loading && user) playHop();
+    if (!loading && user) {
+      playHop();
+    }
   }, [bunny, loading, user]);
 
-  const handleBunnyChange = useCallback((id: BunnyId) => setBunny(id), []);
+  const handleBunnyChange = useCallback(
+    (id: BunnyId) => setBunny(id),
+    []
+  );
 
   const handleSend = useCallback(
     async (text: string) => {
       playBoop();
+
       const result = await ask(text);
-      if (result?.reply) speak(result.reply);
+
+      if (result?.reply) {
+        speak(result.reply);
+      }
     },
-    [ask, speak],
+    [ask, speak]
   );
 
   const handleLogout = useCallback(async () => {
     stop();
+
     reset();
+
     await supabase.auth.signOut();
+
     navigate({ to: "/auth" });
   }, [stop, reset, navigate]);
 
   const current = getBunny(bunny);
+
   const heroStyle = useMemo(
     () => ({
-      backgroundImage: `radial-gradient(circle at 12% 10%, ${current.glow}, transparent 34%), radial-gradient(circle at 88% 18%, ${current.accent}55, transparent 38%), linear-gradient(160deg, ${current.furLight} 0%, ${current.furDark} 100%)`,
+      backgroundImage: `
+        radial-gradient(circle at 10% 10%, ${current.glow}, transparent 28%),
+        radial-gradient(circle at 90% 0%, ${current.accent}40, transparent 30%),
+        linear-gradient(
+          180deg,
+          #f7f9ff 0%,
+          #eef6ff 45%,
+          #fdfcff 100%
+        )
+      `,
     }),
-    [current],
+    [current]
   );
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center text-muted-foreground">
-        Loading…
+      <main className="flex min-h-screen items-center justify-center text-slate-500">
+        Loading...
       </main>
     );
   }
-  if (!user) return <Navigate to="/auth" />;
 
-  return (
-    // ── On mobile: full dvh, no overflow, flex-col so bunny + chat stack neatly
-    // ── On desktop: original spacious centred layout
-    <main
-      className="relative mx-auto flex max-w-6xl flex-col items-center px-3 sm:px-4
-                     min-h-[100dvh] overflow-hidden
-                     md:min-h-screen md:overflow-visible md:py-8"
-      style={heroStyle}
-    >
-      <StarField />
+  if (!user) {
+    return <Navigate to="/auth" />;
+  }
 
-      {/* Profile menu — absolute so it doesn't affect layout flow */}
-      <div className="absolute right-4 top-4 z-10">
-        <ProfileMenu
-          userId={user.id}
-          email={user.email ?? ""}
-          onLogout={handleLogout}
-          onBunnyChange={handleBunnyChange}
-        />
-      </div>
+return (
+  <main
+    style={{
+      ...heroStyle,
+      WebkitTapHighlightColor: "transparent",
+    }}
+    className="
+      relative
+      mx-auto
+      flex
+      min-h-[100dvh]
+      max-w-6xl
+      flex-col
+      overflow-hidden
+      px-3
+      pt-3
+      pb-3
+      sm:px-4
+    "
+  >
+    <StarField />
 
-      <header className="mb-4 w-full rounded-[2rem] border border-white/15 bg-white/25 px-4 py-4 text-center shadow-[0_30px_80px_-40px_rgba(0,0,0,0.45)] backdrop-blur-xl md:mb-6 md:px-5 md:py-5">
-        <p className="text-[11px] uppercase tracking-[0.35em] text-slate-600">AI Bunny chat</p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
-          Chat with <span className="text-gradient">{current.name}</span> {current.emoji}
-        </h1>
-        <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-700 sm:text-base">
-          {current.description}
-        </p>
-      </header>
-
-      {/* Main content area:
-          Mobile  → vertical stack, bunny shrinks, chat fills remaining space
-          Desktop → side-by-side grid, original sizing */}
-      <section
-        className={`
-        flex flex-col items-center w-full gap-3 flex-1 min-h-0
-        ${isAndroid ? "pt-16" : "pt-14"}
-        md:grid md:grid-cols-2 md:items-center md:gap-8 md:pt-0 md:flex-none
-      `}
+    {/* NAVBAR */}
+    <div className="sticky top-0 z-30 w-full">
+      <div
+        className="
+          flex
+          items-center
+          justify-between
+          rounded-[28px]
+          border
+          border-white/40
+          bg-white/50
+          px-4
+          py-3
+          shadow-[0_8px_40px_rgba(15,23,42,0.05)]
+          backdrop-blur-2xl
+        "
       >
-        {/* Bunny column — shrink-0 so keyboard never pushes it off screen */}
-        <div className="flex shrink-0 flex-col items-center justify-center gap-2 md:gap-3">
-          {/* Scale bunny down on mobile */}
-          <div className={`${isAndroid ? "scale-[0.64]" : "scale-[0.72]"} md:scale-100 origin-top`}>
-            <Avatar
-              isSpeaking={isSpeaking}
-              isThinking={state === "thinking"}
-              emotion={emotion}
-              mouthLevel={mouthLevel}
-              bunny={bunny}
-            />
+        {/* LEFT */}
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div
+            className="
+              flex
+              h-11
+              w-11
+              shrink-0
+              items-center
+              justify-center
+              rounded-2xl
+              bg-gradient-to-br
+              from-violet-500
+              to-blue-500
+              text-sm
+              font-bold
+              text-white
+              shadow-lg
+              shadow-blue-200/50
+            "
+          >
+            AI
           </div>
-          <span className="rounded-full bg-secondary px-3 py-1 text-xs capitalize text-muted-foreground -mt-8 md:mt-0">
-            mood: {emotion}
-          </span>
+
+          <div className="min-w-0">
+            <p className="text-[10px] uppercase tracking-[0.32em] text-slate-500">
+              Bunny AI
+            </p>
+
+            <h2 className="truncate text-[16px] font-semibold text-slate-900">
+              {current.name}
+            </h2>
+          </div>
         </div>
 
-        {/* Chat column — flex-1 + min-h-0 makes it fill leftover space on mobile */}
-        <div className="w-full flex-1 min-h-0 flex flex-col md:flex-none md:block">
-          <ChatBox
-            messages={messages}
-            state={state}
-            onSend={handleSend}
-            onStop={stop}
-            bunnyTheme={current}
+        {/* RIGHT */}
+        <div className="ml-3 shrink-0">
+          <ProfileMenu
+            userId={user.id}
+            email={user.email ?? ""}
+            onLogout={handleLogout}
+            onBunnyChange={handleBunnyChange}
           />
         </div>
-      </section>
+      </div>
+    </div>
 
-      {/* Footer — hidden on mobile */}
-      <footer className="hidden md:block mt-10 text-center text-xs text-gray-500 shrink-0">
-        <p>
-          Private chat · Conversations are not saved ·{" "}
-          <span className="text-black-300 font-medium">Powered by Tushar Studio</span>
-        </p>
-        <div className="mt-2 flex justify-center gap-4">
-          <a href="/privacy" className="hover:text-white">
-            Privacy
-          </a>
-          <a href="/terms" className="hover:text-white">
-            Terms
-          </a>
+    {/* HERO */}
+    <header
+      className="
+        mt-4
+        rounded-[34px]
+        border
+        border-white/30
+        bg-white/35
+        px-5
+        py-7
+        text-center
+        shadow-[0_10px_50px_rgba(15,23,42,0.05)]
+        backdrop-blur-2xl
+      "
+    >
+      <p className="text-[11px] uppercase tracking-[0.38em] text-slate-500">
+        AI Bunny Chat
+      </p>
+
+      <h1
+        className="
+          mt-4
+          text-[32px]
+          leading-[1.05]
+          font-bold
+          tracking-tight
+          text-slate-900
+          sm:text-5xl
+        "
+      >
+        Chat with{" "}
+        <span className="bg-gradient-to-r from-cyan-500 to-violet-500 bg-clip-text text-transparent">
+          {current.name}
+        </span>
+      </h1>
+
+      <div className="mt-3 text-3xl">
+        {current.emoji}
+      </div>
+
+      <p
+        className="
+          mx-auto
+          mt-4
+          max-w-md
+          text-[15px]
+          leading-7
+          text-slate-600
+        "
+      >
+        {current.description}
+      </p>
+    </header>
+
+    {/* MAIN */}
+    <section
+      className="
+        flex
+        flex-1
+        min-h-0
+        flex-col
+        items-center
+        justify-between
+        pt-4
+        md:grid
+        md:grid-cols-2
+        md:gap-10
+      "
+    >
+      {/* BUNNY */}
+      <div
+        className="
+          flex
+          flex-1
+          flex-col
+          items-center
+          justify-center
+        "
+      >
+        <div className="scale-[0.72] sm:scale-[0.85] md:scale-100">
+          <Avatar
+            isSpeaking={isSpeaking}
+            isThinking={state === "thinking"}
+            emotion={emotion}
+            mouthLevel={mouthLevel}
+            bunny={bunny}
+          />
         </div>
-      </footer>
-    </main>
-  );
+
+        <div
+          className="
+            mt-2
+            rounded-full
+            border
+            border-white/50
+            bg-white/65
+            px-5
+            py-2
+            text-sm
+            font-medium
+            text-slate-700
+            shadow-sm
+            backdrop-blur-xl
+          "
+        >
+          Mood: {emotion}
+        </div>
+      </div>
+
+      {/* CHAT */}
+      <div
+        className="
+          mt-5
+          flex
+          w-full
+          min-h-0
+          flex-col
+          md:mt-0
+        "
+      >
+        <ChatBox
+          messages={messages}
+          state={state}
+          onSend={handleSend}
+          onStop={stop}
+          bunnyTheme={current}
+        />
+      </div>
+    </section>
+  </main>
+);
 }

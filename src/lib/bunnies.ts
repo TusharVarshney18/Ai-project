@@ -29,18 +29,7 @@ export type BunnyConfig = {
   /** UI accent (used for chips / theme hint) */
   accent: string;
   /** Accessory type rendered in Avatar SVG */
-  accessory:
-    | "bow"
-    | "star-crown"
-    | "headband"
-    | "moon"
-    | "leaf-clip"
-    | "sakura"
-    | "cloud-hat"
-    | "polka-bow"
-    | "fluffy-tuft"
-    | "berry-cluster"
-    | "none";
+  accessory: "bow" | "star-crown" | "headband" | "moon" | "leaf-clip" | "sakura" | "cloud-hat" | "polka-bow" | "fluffy-tuft" | "berry-cluster" | "none";
   /** Primary accessory color */
   accessoryColor: string;
   /** Secondary accessory color */
